@@ -1,0 +1,191 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Trebuchet MS", Arial, sans-serif;
+    background: #eee5ff;
+    margin: 0;
+    padding: 40px 20px;
+    color: #55436b;
+}
+
+.container {
+    max-width: 650px;
+    margin: auto;
+}
+
+h1 {
+    text-align: center;
+    color: #8064a2;
+    font-size: 38px;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #9a83ad;
+    margin-bottom: 30px;
+}
+
+h2 {
+    color: #6d587f;
+    font-size: 21px;
+}
+
+.balance-card {
+    background: white;
+    padding: 25px;
+    border-radius: 25px;
+    text-align: center;
+    margin-bottom: 20px;
+    border: 2px solid #dfd0ed;
+    box-shadow: 0 8px 20px rgba(130, 100, 160, 0.12);
+}
+
+.balance-card p {
+    margin: 0;
+    color: #9a83ad;
+}
+
+#balance {
+    color: #8064a2;
+    font-size: 38px;
+    margin: 10px 0 0;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    margin-bottom: 20px;
+    border-radius: 22px;
+    border: 2px solid #dfd0ed;
+    box-shadow: 0 6px 15px rgba(130, 100, 160, 0.08);
+}
+
+.card h2 {
+    margin-top: 0;
+}
+
+input {
+    display: block;
+    width: 100%;
+    padding: 14px 16px;
+    margin: 10px 0;
+    border: 2px solid #d9c8ed;
+    border-radius: 16px;
+    background: #fcfaff;
+    color: #55436b;
+    font-size: 16px;
+    outline: none;
+}
+
+input::placeholder {
+    color: #b5a5c5;
+}
+
+input:focus {
+    border-color: #b9a1d2;
+    box-shadow: 0 0 8px rgba(160, 130, 190, 0.2);
+}
+
+button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 16px;
+    background: #b9a1d2;
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: #a98cc5;
+    transform: translateY(-2px);
+}
+
+.summary-card {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.summary-card > div {
+    flex: 1;
+    background: white;
+    padding: 20px;
+    border-radius: 20px;
+    text-align: center;
+    border: 2px solid #dfd0ed;
+    box-shadow: 0 6px 15px rgba(130, 100, 160, 0.08);
+}
+
+.summary-card p {
+    color: #9a83ad;
+    margin: 0 0 8px;
+}
+
+.summary-card h3 {
+    margin: 0;
+    color: #8064a2;
+    font-size: 22px;
+}
+
+.expense-item {
+    background: #f8f3ff;
+    border: 2px solid #e5d9f1;
+    padding: 17px;
+    margin: 12px 0;
+    border-radius: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.expense-info strong {
+    color: #6d587f;
+    font-size: 17px;
+}
+
+.expense-info span {
+    display: block;
+    margin-top: 5px;
+    color: #8c789d;
+}
+
+.delete-button {
+    background: #d8b8dc;
+    padding: 9px 12px;
+    font-size: 13px;
+}
+
+.delete-button:hover {
+    background: #c99aca;
+}
+
+.empty {
+    text-align: center;
+    color: #b5a5c5;
+    padding: 15px;
+}
+
+@media (max-width: 500px) {
+
+    body {
+        padding: 25px 15px;
+    }
+
+    h1 {
+        font-size: 30px;
+    }
+
+    .summary-card {
+        flex-direction: column;
+    }
+
+    .expense-item {
+        gap: 10px;
+    }
+}
