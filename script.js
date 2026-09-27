@@ -1,192 +1,167 @@
-let notes = [];
+let budget = 0;
+let income = 0;
+let expenses = [];
 
-try {
-    notes = JSON.parse(localStorage.getItem("purpleNotes")) || [];
-} catch (error) {
-    notes = [];
+
+/* SET STARTING BUDGET */
+
+function setBudget() {
+
+    let amount = Number(
+        document.getElementById("startingBudget").value
+    );
+
+    if (amount <= 0) {
+        alert("Please enter a valid budget.");
+        return;
+    }
+
+    budget = amount;
+
+    updateDisplay();
+
+    document.getElementById("startingBudget").value = "";
 }
 
 
-/* CREATE NEW NOTE */
+/* ADD INCOME */
 
-function createNote() {
+function addIncome() {
 
-    let title = prompt("Note title:");
+    let name =
+        document.getElementById("incomeName").value.trim();
 
-    if (title === null || title.trim() === "") {
+    let amount =
+        Number(document.getElementById("incomeAmount").value);
+
+    if (name === "" || amount <= 0) {
+        alert("Please enter the income details.");
         return;
     }
 
-    let content = prompt("Write your note:");
+    income += amount;
 
-    if (content === null || content.trim() === "") {
+    updateDisplay();
+
+    document.getElementById("incomeName").value = "";
+    document.getElementById("incomeAmount").value = "";
+}
+
+
+/* ADD EXPENSE */
+
+function addExpense() {
+
+    let name =
+        document.getElementById("expenseName").value.trim();
+
+    let amount =
+        Number(document.getElementById("expenseAmount").value);
+
+    if (name === "" || amount <= 0) {
+        alert("Please enter the expense details.");
         return;
     }
 
-    notes.unshift({
-        id: Date.now(),
-        title: title.trim(),
-        content: content.trim(),
-        pinned: false
+    expenses.push({
+        name: name,
+        amount: amount
     });
 
-    saveNotes();
-    displayNotes();
+    updateDisplay();
+
+    document.getElementById("expenseName").value = "";
+    document.getElementById("expenseAmount").value = "";
 }
 
 
-/* DISPLAY NOTES */
+/* UPDATE EVERYTHING */
 
-function displayNotes(noteList = notes) {
+function updateDisplay() {
 
-    let list = document.getElementById("notesList");
+    let totalExpenses = expenses.reduce(
+        function(total, expense) {
+            return total + expense.amount;
+        },
+        0
+    );
+
+    let balance =
+        budget + income - totalExpenses;
+
+
+    document.getElementById("balance").textContent =
+        "₱" + balance.toFixed(2);
+
+    document.getElementById("totalIncome").textContent =
+        "₱" + income.toFixed(2);
+
+    document.getElementById("totalExpenses").textContent =
+        "₱" + totalExpenses.toFixed(2);
+
+
+    displayExpenses();
+}
+
+
+/* DISPLAY EXPENSES */
+
+function displayExpenses() {
+
+    let list =
+        document.getElementById("expenseList");
 
     list.innerHTML = "";
 
-    if (noteList.length === 0) {
+    if (expenses.length === 0) {
+
         list.innerHTML =
-            '<p class="empty">No notes yet 💜</p>';
+            '<p class="empty">No expenses yet 💜';
+
         return;
     }
 
-    noteList.forEach(function(note) {
 
-        let noteElement = document.createElement("div");
+    expenses.forEach(function(expense, index) {
 
-        noteElement.className = "note";
+        let item =
+            document.createElement("div");
 
-        noteElement.innerHTML = `
-            <h2>${note.pinned ? "📌 " : ""}${note.title}</h2>
-            <p>${note.content}</p>
+        item.className = "expense-item";
 
-            <div class="note-buttons">
-
-                <button onclick="pinNote(${note.id})">
-                    ${note.pinned ? "Unpin" : "Pin"}
-                </button>
-
-                <button onclick="editNote(${note.id})">
-                    Edit
-                </button>
-
-                <button onclick="deleteNote(${note.id})">
-                    Delete
-                </button>
-
+        item.innerHTML = `
+            <div>
+                <strong>${expense.name}</strong>
+                <p>₱${expense.amount.toFixed(2)}</p>
             </div>
+
+            <button onclick="deleteExpense(${index})">
+                Delete
+            </button>
         `;
 
-        list.appendChild(noteElement);
+        list.appendChild(item);
     });
 }
 
 
-/* PIN NOTE */
+/* DELETE EXPENSE */
 
-function pinNote(id) {
-
-    let note = notes.find(function(note) {
-        return note.id === id;
-    });
-
-    if (!note) return;
-
-    note.pinned = !note.pinned;
-
-    notes.sort(function(a, b) {
-        return b.pinned - a.pinned;
-    });
-
-    saveNotes();
-    displayNotes();
-}
-
-
-/* EDIT NOTE */
-
-function editNote(id) {
-
-    let note = notes.find(function(note) {
-        return note.id === id;
-    });
-
-    if (!note) return;
-
-    let newTitle = prompt("Edit title:", note.title);
-
-    if (newTitle === null || newTitle.trim() === "") {
-        return;
-    }
-
-    let newContent = prompt("Edit note:", note.content);
-
-    if (newContent === null || newContent.trim() === "") {
-        return;
-    }
-
-    note.title = newTitle.trim();
-    note.content = newContent.trim();
-
-    saveNotes();
-    displayNotes();
-}
-
-
-/* DELETE NOTE */
-
-function deleteNote(id) {
+function deleteExpense(index) {
 
     let confirmDelete =
-        confirm("Delete this note?");
+        confirm("Delete this expense?");
 
     if (!confirmDelete) {
         return;
     }
 
-    notes = notes.filter(function(note) {
-        return note.id !== id;
-    });
+    expenses.splice(index, 1);
 
-    saveNotes();
-    displayNotes();
+    updateDisplay();
 }
 
 
-/* SEARCH */
+/* START */
 
-function searchNotes() {
-
-    let search =
-        document.getElementById("searchInput").value.toLowerCase();
-
-    let filteredNotes = notes.filter(function(note) {
-
-        return (
-            note.title.toLowerCase().includes(search) ||
-            note.content.toLowerCase().includes(search)
-        );
-
-    });
-
-    displayNotes(filteredNotes);
-}
-
-
-/* SAVE NOTES */
-
-function saveNotes() {
-
-    try {
-        localStorage.setItem(
-            "purpleNotes",
-            JSON.stringify(notes)
-        );
-    } catch (error) {
-        console.log("Storage unavailable.");
-    }
-}
-
-
-/* LOAD NOTES */
-
-displayNotes();
+updateDisplay();
