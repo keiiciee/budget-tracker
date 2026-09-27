@@ -1,174 +1,192 @@
-let balance = 0;
-let totalIncome = 0;
-let totalExpenses = 0;
+let notes = [];
 
-let expenses = [];
-
-
-/* SET STARTING BUDGET */
-
-function setBudget() {
-
-    let startingBudget =
-        Number(document.getElementById("startingBudget").value);
-
-    if (startingBudget <= 0) {
-        alert("Please enter a valid budget.");
-        return;
-    }
-
-    balance = startingBudget;
-    totalIncome = startingBudget;
-    totalExpenses = 0;
-    expenses = [];
-
-    updateDisplay();
-    displayExpenses();
-
-    document.getElementById("startingBudget").value = "";
+try {
+    notes = JSON.parse(localStorage.getItem("purpleNotes")) || [];
+} catch (error) {
+    notes = [];
 }
 
 
-/* ADD INCOME */
+/* CREATE NEW NOTE */
 
-function addIncome() {
+function createNote() {
 
-    let name =
-        document.getElementById("incomeName").value;
+    let title = prompt("Note title:");
 
-    let amount =
-        Number(document.getElementById("incomeAmount").value);
-
-    if (name === "") {
-        alert("Please enter where the income came from.");
+    if (title === null || title.trim() === "") {
         return;
     }
 
-    if (amount <= 0) {
-        alert("Please enter a valid amount.");
+    let content = prompt("Write your note:");
+
+    if (content === null || content.trim() === "") {
         return;
     }
 
-    balance += amount;
-    totalIncome += amount;
-
-    updateDisplay();
-
-    document.getElementById("incomeName").value = "";
-    document.getElementById("incomeAmount").value = "";
-
-    alert("Income added successfully!");
-}
-
-
-/* ADD EXPENSE */
-
-function addExpense() {
-
-    let item =
-        document.getElementById("expenseName").value;
-
-    let amount =
-        Number(document.getElementById("expenseAmount").value);
-
-    if (item === "") {
-        alert("Please enter what you bought.");
-        return;
-    }
-
-    if (amount <= 0) {
-        alert("Please enter a valid amount.");
-        return;
-    }
-
-    if (amount > balance) {
-        alert("You don't have enough budget!");
-        return;
-    }
-
-    expenses.push({
-        name: item,
-        amount: amount
+    notes.unshift({
+        id: Date.now(),
+        title: title.trim(),
+        content: content.trim(),
+        pinned: false
     });
 
-    balance -= amount;
-    totalExpenses += amount;
-
-    updateDisplay();
-    displayExpenses();
-
-    document.getElementById("expenseName").value = "";
-    document.getElementById("expenseAmount").value = "";
+    saveNotes();
+    displayNotes();
 }
 
 
-/* DELETE EXPENSE */
+/* DISPLAY NOTES */
 
-function deleteExpense(index) {
+function displayNotes(noteList = notes) {
 
-    let deletedExpense = expenses[index];
-
-    balance += deletedExpense.amount;
-    totalExpenses -= deletedExpense.amount;
-
-    expenses.splice(index, 1);
-
-    updateDisplay();
-    displayExpenses();
-}
-
-
-/* UPDATE NUMBERS */
-
-function updateDisplay() {
-
-    document.getElementById("balance").innerText =
-        "₱" + balance.toFixed(2);
-
-    document.getElementById("totalIncome").innerText =
-        "₱" + totalIncome.toFixed(2);
-
-    document.getElementById("totalExpenses").innerText =
-        "₱" + totalExpenses.toFixed(2);
-}
-
-
-/* DISPLAY EXPENSES */
-
-function displayExpenses() {
-
-    let list =
-        document.getElementById("expenseList");
+    let list = document.getElementById("notesList");
 
     list.innerHTML = "";
 
-    if (expenses.length === 0) {
-
+    if (noteList.length === 0) {
         list.innerHTML =
-            '<p class="empty">No expenses yet 💜</p>';
-
+            '<p class="empty">No notes yet 💜</p>';
         return;
     }
 
-    for (let i = 0; i < expenses.length; i++) {
+    noteList.forEach(function(note) {
 
-        let expense = document.createElement("div");
+        let noteElement = document.createElement("div");
 
-        expense.className = "expense-item";
+        noteElement.className = "note";
 
-        expense.innerHTML = `
-            <div class="expense-info">
-                <strong>🛍️ ${expenses[i].name}</strong>
-                <span>₱${expenses[i].amount.toFixed(2)}</span>
+        noteElement.innerHTML = `
+            <h2>${note.pinned ? "📌 " : ""}${note.title}</h2>
+            <p>${note.content}</p>
+
+            <div class="note-buttons">
+
+                <button onclick="pinNote(${note.id})">
+                    ${note.pinned ? "Unpin" : "Pin"}
+                </button>
+
+                <button onclick="editNote(${note.id})">
+                    Edit
+                </button>
+
+                <button onclick="deleteNote(${note.id})">
+                    Delete
+                </button>
+
             </div>
-
-            <button
-                class="delete-button"
-                onclick="deleteExpense(${i})">
-                🗑️
-            </button>
         `;
 
-        list.appendChild(expense);
+        list.appendChild(noteElement);
+    });
+}
+
+
+/* PIN NOTE */
+
+function pinNote(id) {
+
+    let note = notes.find(function(note) {
+        return note.id === id;
+    });
+
+    if (!note) return;
+
+    note.pinned = !note.pinned;
+
+    notes.sort(function(a, b) {
+        return b.pinned - a.pinned;
+    });
+
+    saveNotes();
+    displayNotes();
+}
+
+
+/* EDIT NOTE */
+
+function editNote(id) {
+
+    let note = notes.find(function(note) {
+        return note.id === id;
+    });
+
+    if (!note) return;
+
+    let newTitle = prompt("Edit title:", note.title);
+
+    if (newTitle === null || newTitle.trim() === "") {
+        return;
+    }
+
+    let newContent = prompt("Edit note:", note.content);
+
+    if (newContent === null || newContent.trim() === "") {
+        return;
+    }
+
+    note.title = newTitle.trim();
+    note.content = newContent.trim();
+
+    saveNotes();
+    displayNotes();
+}
+
+
+/* DELETE NOTE */
+
+function deleteNote(id) {
+
+    let confirmDelete =
+        confirm("Delete this note?");
+
+    if (!confirmDelete) {
+        return;
+    }
+
+    notes = notes.filter(function(note) {
+        return note.id !== id;
+    });
+
+    saveNotes();
+    displayNotes();
+}
+
+
+/* SEARCH */
+
+function searchNotes() {
+
+    let search =
+        document.getElementById("searchInput").value.toLowerCase();
+
+    let filteredNotes = notes.filter(function(note) {
+
+        return (
+            note.title.toLowerCase().includes(search) ||
+            note.content.toLowerCase().includes(search)
+        );
+
+    });
+
+    displayNotes(filteredNotes);
+}
+
+
+/* SAVE NOTES */
+
+function saveNotes() {
+
+    try {
+        localStorage.setItem(
+            "purpleNotes",
+            JSON.stringify(notes)
+        );
+    } catch (error) {
+        console.log("Storage unavailable.");
     }
 }
+
+
+/* LOAD NOTES */
+
+displayNotes();
